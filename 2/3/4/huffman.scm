@@ -81,3 +81,18 @@
       (append (encode-symbol (car message) tree)
 	      (encode (cdr message) tree))))
 
+(define (generate-huffman-tree pairs)
+  (define (successive-merge tree-list)
+    (define (insert new-tree rest)
+      (if (null rest) 
+	  (cons new-tree '())
+	  (if (< (weight new-tree) (weight (car rest)))
+	      (cons new-tree rest)
+	      (cons (car rest) (insert new-tree (cdr rest))))))
+    (let ((new-tree (make-code-tree (car tree-list) (cadr tree-list)))
+	  (rest (cddr tree-list)))
+      (if (null? rest) 
+	  new-tree
+	  (successive-merge (insert new-tree rest)))
+  (sucessive-merge (make-leaf-set pairs)))
+
