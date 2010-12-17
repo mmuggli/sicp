@@ -45,19 +45,19 @@
         ((= bit 1) (right-branch branch))
         (else (error "bad bit -- CHOOSE-BRANCH" bit))))
 
-;; (define (adjoin-set x set)
-;;   (cond ((null? set) (list x))
-;;         ((< (weight x) (weight (car set))) (cons x set))
-;;         (else (cons (car set)
-;;                     (adjoin-set x (cdr set))))))
+(define (adjoin-set x set)
+  (cond ((null? set) (list x))
+        ((< (weight x) (weight (car set))) (cons x set))
+        (else (cons (car set)
+                    (adjoin-set x (cdr set))))))
 
-;; (define (make-leaf-set pairs)
-;;   (if (null? pairs)
-;;       '()
-;;       (let ((pair (car pairs)))
-;;         (adjoin-set (make-leaf (car pair)    ; symbol
-;;                                (cadr pair))  ; frequency
-;;                     (make-leaf-set (cdr pairs))))))
+(define (make-leaf-set pairs)
+  (if (null? pairs)
+      '()
+      (let ((pair (car pairs)))
+        (adjoin-set (make-leaf (car pair)    ; symbol
+                               (cadr pair))  ; frequency
+                    (make-leaf-set (cdr pairs))))))
 
 (define sample-tree
   (make-code-tree (make-leaf 'A 4)
@@ -67,3 +67,17 @@
                                    (make-leaf 'C 1)))))
 
 (define sample-message '(0 1 1 0 0 1 0 1 0 1 1 1 0))
+
+(define (encode message tree)
+  (define (encode-symbol symbol tree)
+    (cond ((leaf? tree) '())
+	  ((member symbol (symbols (left-branch tree))) 
+	   (cons 0 (encode-symbol symbol (left-branch tree))))
+	  ((member symbol (symbols (right-branch tree))) 
+	   (cons 1 (encode-symbol symbol (right-branch tree))))
+	  (else (error "bad symbol -- ENCODE-SYMBOL"))))
+  (if (null? message)
+      '()
+      (append (encode-symbol (car message) tree)
+	      (encode (cdr message) tree))))
+
